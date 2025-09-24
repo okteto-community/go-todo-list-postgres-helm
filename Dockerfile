@@ -2,6 +2,7 @@ FROM golang:buster as builder
 
 WORKDIR /app
 ADD . .
+RUN go mod tidy
 RUN go build -o app
 
 ##########################

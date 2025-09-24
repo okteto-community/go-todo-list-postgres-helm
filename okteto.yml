@@ -1,0 +1,7 @@
+build:
+  todo-app:
+    context: .
+
+deploy:
+  - helm upgrade --install postgres oci://registry-1.docker.io/cloudpirates/postgres --set postgres.password=todopassword --set postgres.database=todos --set service.type=ClusterIP
+  - envsubst < k8s.yml | kubectl apply -f -
