@@ -1,0 +1,30 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: postgres-db-init
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: db-init
+        image: postgres:15
+        env:
+        - name: PGPASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres
+              key: postgres-password
+        command: 
+        - sh
+        - -c
+        - |
+          echo "Waiting for PostgreSQL to be ready..."
+          until pg_isready -h postgres -U postgres; do
+            echo "PostgreSQL is not ready yet. Waiting..."
+            sleep 2
+          done
+          echo "PostgreSQL is ready. Creating database..."
+          psql -h postgres -U postgres -d postgres -c "SELECT 1 FROM pg_database WHERE datname = 'todos'" | grep -q 1 || psql -h postgres -U postgres -d postgres -c "CREATE DATABASE todos;"
+          echo "Database setup complete."
+  backoffLimit: 3

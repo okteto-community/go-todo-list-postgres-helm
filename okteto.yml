@@ -4,4 +4,7 @@ build:
 
 deploy:
   - helm upgrade --install postgres oci://registry-1.docker.io/cloudpirates/postgres --set postgres.password=todopassword --set postgres.database=todos --set service.type=ClusterIP
+  - kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=postgres --timeout=300s
+  - kubectl apply -f db-init.yaml
+  - kubectl wait --for=condition=complete job/postgres-db-init --timeout=120s
   - envsubst < k8s.yml | kubectl apply -f -
